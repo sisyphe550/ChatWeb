@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 public class mclient {
 
     public static void main(String s[]) throws Exception {
+        System.setProperty("java.net.preferIPv4Stack", "true");
+
         Socket s1_socket = null; // Renamed to avoid conflict with argument 's'
         BufferedReader br = null;
         final BufferedReader socket_reader;

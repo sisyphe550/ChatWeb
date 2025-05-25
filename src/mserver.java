@@ -16,8 +16,9 @@ public class mserver {
     private static volatile boolean running = true;
 
     public static void main(String s[]) throws Exception {
+        System.setProperty("java.net.preferIPv4Stack", "true");
+
         Socket sa = null;
-        // ServerSocket ss2 = null; // Moved to static field
         System.out.println("Host starts accepting response ");
 
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -49,29 +50,36 @@ public class mserver {
         }));
 
         try {
-            ss2 = new ServerSocket(9998); // Changed port to 9998
+            ss2 = new ServerSocket(9998);
         } catch (IOException e) {
             System.err.println("Error initializing server socket on port 9998: " + e.getMessage()); // Updated port in error message
             e.printStackTrace();
             System.exit(1); // Exit if server socket cannot be created
         }
-        while (running) { // Loop while running is true
+        while (running) {
             try {
+                System.out.println("DEBUG: Main loop - Waiting to accept new client...");
                 sa = ss2.accept();
-                if (!running) break; // Check again after accept, in case shutdown started during accept
-                System.out.println("connection established by" + ss2.getInetAddress());
+                System.out.println("DEBUG: Main loop - Accepted a client: " + sa.getRemoteSocketAddress());
+                
+                if (!running) {
+                    // If server was stopped while accept() was blocking
+                    if (sa != null) try { sa.close(); } catch (IOException e) { /* ignore */ }
+                    break;
+                }
+                
+                System.out.println("connection established from address: " + sa.getRemoteSocketAddress() + " with local port: " + sa.getLocalPort());
                 ServerThread st = new ServerThread(sa);
                 st.start();
             } catch (SocketException e) {
                 if (!running || (ss2 != null && ss2.isClosed())) {
                     System.out.println("Server socket closed, exiting main loop.");
-                    // This is expected if the server is shutting down
                 } else {
                     System.err.println("SocketException in main loop (server still running?):" + e.getMessage());
                     e.printStackTrace();
                 }
             } catch (Exception e) {
-                if (running) { // Only log if we are supposed to be running
+                if (running) {
                     System.err.println("Connection error in main loop:");
                     e.printStackTrace();
                 }
