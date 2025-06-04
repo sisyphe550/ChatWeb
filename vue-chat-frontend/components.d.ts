@@ -14,7 +14,6 @@ declare module 'vue' {
     MessageInput: typeof import('./src/components/MessageInput.vue')['default']
     MessageItem: typeof import('./src/components/MessageItem.vue')['default']
     MessageList: typeof import('./src/components/MessageList.vue')['default']
-    NButton: typeof import('naive-ui')['NButton']
     UserList: typeof import('./src/components/UserList.vue')['default']
   }
 }
